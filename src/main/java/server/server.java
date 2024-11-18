@@ -5,7 +5,6 @@ import misc.*;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
