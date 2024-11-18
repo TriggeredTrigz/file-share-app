@@ -3,6 +3,11 @@ package server;
 import misc.*;
 
 import java.net.Socket;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -17,6 +22,7 @@ public class server {
 
     public static int serverPort = 1234;
     public static String serverAddress = "";
+    public static InetAddress serverInetAddress;
     public static ServerSocket serverSocket;
     
     public static Socket clientSocket;
@@ -27,8 +33,38 @@ public class server {
 
         try{
 
-            // start server
-            serverSocket = new ServerSocket(serverPort);
+            // finds inetAddress to initiate server on
+            Enumeration<NetworkInterface> netInts = NetworkInterface.getNetworkInterfaces(); 
+            for (NetworkInterface netInt : Collections.list(netInts)) {
+                if (!( 
+                    ( 
+                        netInt.getDisplayName().contains("Intel") || 
+                        netInt.getDisplayName().contains("Realtek") || 
+                        netInt.getDisplayName().contains("MediaTek") ||
+                        netInt.getDisplayName().contains("Asus") ||
+                        netInt.getDisplayName().contains("Qualcomm") ||
+                        netInt.getDisplayName().contains("TP-Link") ||
+                        netInt.getDisplayName().contains("Broadcom") ||
+                        netInt.getDisplayName().contains("D-Link") ||
+                        netInt.getDisplayName().contains("Netgear") ||
+                        netInt.getDisplayName().contains("Edimax")
+                    ) 
+                    && ( 
+                        netInt.getDisplayName().contains("Ethernet") || 
+                        netInt.getDisplayName().contains("Wi-Fi") 
+                    )
+                    )) continue;
+                Enumeration<InetAddress> inetAdds = netInt.getInetAddresses();
+                for (InetAddress inetAdd : Collections.list(inetAdds)) {
+                    if (!inetAdd.isLinkLocalAddress()) {
+                        serverInetAddress = inetAdd;
+                    }
+                }
+            }
+
+            // initates serverSocket
+            serverSocket = new ServerSocket(serverPort, 0, serverInetAddress);
+            System.out.println("Initialized server at " + serverSocket.getLocalSocketAddress());
 
             // listen for clients
             while (!serverSocket.isClosed()) {
